@@ -9,6 +9,7 @@ public class DriftRunner : MonoBehaviour
     private float basePlayerSpeed = 10f;
     private float speedIncreaseRate = 0.5f;
     private float horizontalSpeed = 8f;
+    private float inputSensitivity = 0.01f;
     private float trackWidth = 4f;
     private Vector3 targetPosition;
     
@@ -34,6 +35,13 @@ public class DriftRunner : MonoBehaviour
     // Input
     private Vector3 lastInputPosition;
     private bool isDragging = false;
+    
+    // GUI cache
+    private GUIStyle scoreStyle;
+    private GUIStyle gameOverStyle;
+    private GUIStyle finalScoreStyle;
+    private GUIStyle restartStyle;
+    private bool guiInitialized = false;
 
     void Start()
     {
@@ -116,7 +124,7 @@ public class DriftRunner : MonoBehaviour
             }
             else if (touch.phase == TouchPhase.Moved && isDragging)
             {
-                float deltaX = (touch.position.x - lastInputPosition.x) * 0.01f;
+                float deltaX = (touch.position.x - lastInputPosition.x) * inputSensitivity;
                 targetPosition.x += deltaX * horizontalSpeed * Time.deltaTime;
                 lastInputPosition = touch.position;
             }
@@ -135,7 +143,7 @@ public class DriftRunner : MonoBehaviour
             }
             else if (Input.GetMouseButton(0) && isDragging)
             {
-                float deltaX = (Input.mousePosition.x - lastInputPosition.x) * 0.01f;
+                float deltaX = (Input.mousePosition.x - lastInputPosition.x) * inputSensitivity;
                 targetPosition.x += deltaX * horizontalSpeed * Time.deltaTime;
                 lastInputPosition = Input.mousePosition;
             }
@@ -323,26 +331,39 @@ public class DriftRunner : MonoBehaviour
 
     void OnGUI()
     {
-        // Display score
-        GUI.skin.label.fontSize = 24;
-        GUI.skin.label.normal.textColor = Color.white;
+        // Initialize GUI styles once
+        if (!guiInitialized)
+        {
+            scoreStyle = new GUIStyle(GUI.skin.label);
+            scoreStyle.fontSize = 24;
+            scoreStyle.normal.textColor = Color.white;
+            
+            gameOverStyle = new GUIStyle(GUI.skin.label);
+            gameOverStyle.fontSize = 48;
+            gameOverStyle.normal.textColor = Color.white;
+            
+            finalScoreStyle = new GUIStyle(GUI.skin.label);
+            finalScoreStyle.fontSize = 32;
+            finalScoreStyle.normal.textColor = Color.white;
+            
+            restartStyle = new GUIStyle(GUI.skin.label);
+            restartStyle.fontSize = 24;
+            restartStyle.normal.textColor = Color.white;
+            
+            guiInitialized = true;
+        }
         
         if (!isGameOver)
         {
-            GUI.Label(new Rect(10, 10, 300, 30), "Score: " + Mathf.FloorToInt(score));
-            GUI.Label(new Rect(10, 40, 300, 30), "Speed: " + Mathf.FloorToInt(playerSpeed));
+            GUI.Label(new Rect(10, 10, 300, 30), "Score: " + Mathf.FloorToInt(score), scoreStyle);
+            GUI.Label(new Rect(10, 40, 300, 30), "Speed: " + Mathf.FloorToInt(playerSpeed), scoreStyle);
         }
         else
         {
             // Game Over screen
-            GUI.skin.label.fontSize = 48;
-            GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height / 2 - 100, 300, 60), "GAME OVER");
-            
-            GUI.skin.label.fontSize = 32;
-            GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height / 2 - 30, 300, 40), "Score: " + Mathf.FloorToInt(score));
-            
-            GUI.skin.label.fontSize = 24;
-            GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height / 2 + 30, 300, 30), "Tap/Click to Restart");
+            GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height / 2 - 100, 300, 60), "GAME OVER", gameOverStyle);
+            GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height / 2 - 30, 300, 40), "Score: " + Mathf.FloorToInt(score), finalScoreStyle);
+            GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height / 2 + 30, 300, 30), "Tap/Click to Restart", restartStyle);
         }
     }
 }
